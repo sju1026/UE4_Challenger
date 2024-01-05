@@ -32,8 +32,12 @@ private:
 		class UBoxComponent* WeaponCollision;
 
 	int tempMontage;
+	int boss50MT;
 
+	// Boss Gimmic temp number
 	int tempboss80;
+	int tempboss50;
+	int tempboss30;
 
 protected:
 	class ABaseCharacter* my;

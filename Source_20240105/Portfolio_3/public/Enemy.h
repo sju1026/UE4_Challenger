@@ -44,10 +44,19 @@ public:
 	UAnimMontage* get_montage() const;
 
 	UFUNCTION()
-		void BossFunction();
+		void BossFunction80();
+
+	UFUNCTION()
+		void BossFunction50();
+
+	UFUNCTION()
+		void BossFunction30();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
 		UAnimMontage* start80;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
+		UAnimMontage* boss50;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
@@ -56,6 +65,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
 		UAnimMontage* bossMontage80;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
+		UAnimMontage* bossMontage50;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
+		UAnimMontage* bossMontage30;
+
 	float montageSpeed;
+
+	//class UUserWidget* ui;
 
 };

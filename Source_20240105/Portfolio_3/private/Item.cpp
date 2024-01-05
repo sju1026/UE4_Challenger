@@ -5,7 +5,7 @@
 *  - 아이템 클래스는 플레이어와 상호작용하여 플레이어의 체력을 회복시키는 아이템입니다. 
 *  - 플레이어와의 충돌을 감지하고, 플레이어가 최대 체력을 초과하지 않도록 체력을 증가시킵니다.
 *  - 이후 아이템은 소멸합니다.
-* UpdateRate : 2023 - 12 - 10
+* UpdateRate : 2024 - 01 - 05
 */
 
 #include "Item.h"
@@ -77,6 +77,11 @@ void AItem::EnterPlayer(AActor* overlappedActor, AActor* otherActor)
 		if (itemType.ToString() == "SpeedItem") {
 			player->walkSpeed += value;
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Speed is : %f"), player->walkSpeed));
+		}
+		if (itemType.ToString() == "MaxHealthItem") {
+			player->maxHealth += value;
+			player->health += value;
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("MAXHP is : %f"), player->maxHealth));
 		}
 		Destroy();
 	}

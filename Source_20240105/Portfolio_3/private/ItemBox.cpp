@@ -6,7 +6,7 @@
 * - 플레이어 캐릭터가 '트리거(Trigger)' 박스 컴포넌트와 겹칠 때, 플레이어의 'isBoxOpen' 플래그를 확인하여 참이면 특정 위치에 아이템을 생성합니다. 
 * - 아이템은 상자 위치를 기준으로 일정한 오프셋(FVector(150.0f, 0.0f, 0.0f))을 더한 위치에 생성됩니다. 아이템을 생성한 후에는 아이템 상자를 파괴합니다.
 *
-* UpdateRate : 2023 - 12 - 10
+* UpdateRate : 2024 - 01 - 05
 */
 
 #include "ItemBox.h"
@@ -51,6 +51,10 @@ AItemBox::AItemBox()
 	if (speed_class.Succeeded()) {
 		ItemClasses.Add(speed_class.Class);
 	}
+	static ConstructorHelpers::FClassFinder<AItem>maxHealth_class(TEXT("Blueprint'/Game/_My/Blueprints/Items/BP_Item_MaxHealth.BP_Item_MaxHealth_C'"));
+	if (maxHealth_class.Succeeded()) {
+		ItemClasses.Add(maxHealth_class.Class);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -83,7 +87,7 @@ void AItemBox::EnterTeleporter(AActor* overlappedActor, AActor* otherActor)
 			FDateTime Now = FDateTime::Now();
 			int32 Seed = Now.GetSecond() + Now.GetMillisecond();
 			FRandomStream RandomStream(Seed);
-			int32 RandomNumber = RandomStream.RandRange(0, 2);
+			int32 RandomNumber = RandomStream.RandRange(0, 3);
 
 			GetWorld()->SpawnActor<AItem>(ItemClasses[RandomNumber], spawnLocation, GetActorRotation(), params);
 

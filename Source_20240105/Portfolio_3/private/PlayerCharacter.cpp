@@ -38,7 +38,7 @@ APlayerCharacter::APlayerCharacter() {
 	walkSpeed = 600.0f;
 	dodgeDistance = 4000.0f;
 	isdodge = false;
-	sprintSpeed = walkSpeed + 300.0f;
+	sprintSpeed = 300.0f;
 
 	isForest = false;
 	isStone = false;
@@ -110,7 +110,7 @@ void APlayerCharacter::InputJump()
 
 void APlayerCharacter::SprintEnter()
 {
-	GetCharacterMovement()->MaxWalkSpeed = sprintSpeed;
+	GetCharacterMovement()->MaxWalkSpeed = walkSpeed + sprintSpeed;
 }
 
 void APlayerCharacter::SprintEnd()

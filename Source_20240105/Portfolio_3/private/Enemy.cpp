@@ -17,14 +17,21 @@
 #include <Blueprint/UserWidget.h>
 #include "Components/WidgetComponent.h"
 #include <PlayerCharacter.h>
+#include <UI_InGame.h>
+#include <Blueprint/UserWidget.h>
 
 AEnemy::AEnemy() 
 {
 	weaponCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollision"));
 	weaponCollisionBox->AttachTo(GetMesh(), "WeaponPoint");
-
+	 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	
+	/*static ConstructorHelpers::FObjectFinder<UUserWidget>ui_obj(TEXT("WidgetBlueprint'/Game/_My/UI/WBP_GamePlayerUI.WBP_GamePlayerUI'"));
+	if (ui_obj.Succeeded()) {
+		ui = ui_obj.Object;
+	}*/
+
 	health = maxHealth;
 	montageSpeed = 1.0f;
 }
@@ -47,6 +54,14 @@ void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	/*if (ui) {
+		UUI_InGame* bossUI = Cast<UUI_InGame>(ui);
+		bossUI->set_HUDbar_Boss_value_percent(health / maxHealth);
+	}*/
+
+	if (isDeath == true) {
+		weaponCollisionBox->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
 }
 
 int AEnemy::melee_attack_Implementation()
@@ -66,17 +81,50 @@ UAnimMontage* AEnemy::get_montage() const
 	return montage;
 }
 
-void AEnemy::BossFunction()
+void AEnemy::BossFunction80()
 {
 	if (enemyName.ToString() == "Boss") {
 		if (health / maxHealth <= 0.8f) {
-			SetActorScale3D(FVector(2.0f, 2.0f, 2.0f));
-			maxHealth = 200.0f;
-			health = 150.0f;
+			SetActorScale3D(FVector(1.2f, 1.2f, 1.2f));
+			maxHealth += 200.0f;
+			health += 150.0f;
 			walkSpeed += 100.0f;
-			attackDamage += 10.0f;
+			attackDamage += 1.0f;
 
+			/*UUI_InGame* bossUI = Cast<UUI_InGame>(ui);
+			bossUI->HUD_BossHPbar_value->SetVisibility(ESlateVisibility::Visible);*/
+			
 			montage = bossMontage80;
+		}
+	}
+}
+
+void AEnemy::BossFunction50()
+{
+	if (enemyName.ToString() == "Boss") {
+		if (health / maxHealth <= 0.5f) {
+			SetActorScale3D(FVector(1.5f, 1.5f, 1.5f));
+			maxHealth += 300.0f;
+			health += 150.0f;
+			walkSpeed += 100.0f;
+			attackDamage += 1.0f;
+
+			montage = bossMontage50;
+		}
+	}
+}
+
+void AEnemy::BossFunction30()
+{
+	if (enemyName.ToString() == "Boss") {
+		if (health / maxHealth <= 0.3f) {
+			SetActorScale3D(FVector(2.0f, 2.0f, 2.0f));
+			maxHealth += 400.0f;
+			health += 120.0f;
+			walkSpeed += 100.0f;
+			attackDamage += 1.0f;
+			
+			montage = bossMontage30;
 		}
 	}
 }

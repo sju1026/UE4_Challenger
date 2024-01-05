@@ -21,4 +21,9 @@ public:
 	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
 		UProgressBar* HUD_HPbar_value = nullptr;
 
+	UPROPERTY(BlueprintReadOnly, meta = (BindWidget))
+		UProgressBar* HUD_BossHPbar_value = nullptr;
+
+	void set_HUDbar_Boss_value_percent(float value);
+
 };
