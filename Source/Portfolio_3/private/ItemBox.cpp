@@ -13,12 +13,14 @@
 #include "GameFramework/Actor.h"
 #include <PlayerCharacter.h>
 #include "UObject/ConstructorHelpers.h"
+#include <Particles/ParticleSystem.h>
+#include <Kismet/GameplayStatics.h>
 #include "Math/RandomStream.h"
 
 // Sets default values
 AItemBox::AItemBox()
 {
-	OnActorBeginOverlap.AddDynamic(this, &AItemBox::EnterTeleporter);
+	OnActorBeginOverlap.AddDynamic(this, &AItemBox::EnterActor);
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -55,6 +57,11 @@ AItemBox::AItemBox()
 	if (maxHealth_class.Succeeded()) {
 		ItemClasses.Add(maxHealth_class.Class);
 	}
+
+	static ConstructorHelpers::FObjectFinder<UParticleSystem>particleAsset(TEXT("ParticleSystem'/Game/StarterContent/Particles/P_Explosion.P_Explosion'"));
+	if (particleAsset.Succeeded()) {
+		HitFX = particleAsset.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -71,27 +78,28 @@ void AItemBox::Tick(float DeltaTime)
 
 }
 
-void AItemBox::EnterTeleporter(AActor* overlappedActor, AActor* otherActor)
+void AItemBox::EnterActor(AActor* overlappedActor, AActor* otherActor)
 {
 	if (otherActor->IsA(APlayerCharacter::StaticClass())) {
 		APlayerCharacter* player = Cast<APlayerCharacter>(otherActor);
-		if (player->isBoxOpen == true) {
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "Collision!");
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "Collision!");
 
-			FVector vpos = this->GetActorLocation();
-			FVector spawnLocation = FVector(vpos.X + 150.0f, vpos.Y, vpos.Z);
+		FVector vpos = this->GetActorLocation();
+		FVector spawnLocation = FVector(vpos.X + 150.0f, vpos.Y, vpos.Z);
 
-			FActorSpawnParameters params;
-			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		FActorSpawnParameters params;
+		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-			FDateTime Now = FDateTime::Now();
-			int32 Seed = Now.GetSecond() + Now.GetMillisecond();
-			FRandomStream RandomStream(Seed);
-			int32 RandomNumber = RandomStream.RandRange(0, 3);
+		FDateTime Now = FDateTime::Now();
+		int32 Seed = Now.GetSecond() + Now.GetMillisecond();
+		FRandomStream RandomStream(Seed);
+		int32 RandomNumber = RandomStream.RandRange(0, 3);
 
-			GetWorld()->SpawnActor<AItem>(ItemClasses[RandomNumber], spawnLocation, GetActorRotation(), params);
+		GetWorld()->SpawnActor<AItem>(ItemClasses[RandomNumber], spawnLocation, GetActorRotation(), params);
 
-			Destroy();
+		if (HitFX) {
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), HitFX, GetActorLocation());
 		}
+		Destroy();
 	}
 }

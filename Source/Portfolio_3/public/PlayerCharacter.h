@@ -68,9 +68,34 @@ public:
 	void Attack_OneHand_C();
 	void Attack_OneHand_End();
 
+	void AttackCheck();
+
 protected:
 	virtual void SetupPlayerInputComponent(class UInputComponent* playerInput) override;
 
+
+public:
+	FTimerHandle playerTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
+		bool camYMove = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemBox)
+		bool isBoxOpen = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
+		bool isForest;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
+		bool isStone;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
+		bool isWater;
+
+	UFUNCTION(BlueprintPure)
+		FString GetHealthText() const;
+
+private:
 	void MoveForward(float value);
 
 	void MoveRight(float value);
@@ -85,34 +110,27 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = State)
 		float dodgeDistance;
-	bool isdodge;
+
+	bool dodgeable = true;
+	UPROPERTY(EditAnywhere, Category = State)
+		float dodgeTimer = 3.0f;
 	void Dodging();
 
 	void InputTurn(float value);
 
 	void InputLookUp(float value);
 
-	void Interaction();
-	void Interaction_End();
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+		float AttackRange;
 
-public:
-	FTimerHandle playerTime;
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Category = Attack, Meta = (AllowPrivateAccess = true))
+		float AttackRadius;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera)
-		bool camYMove = false;
+	// Boss Gimmic temp number
+	int tempMontage = 0;
+	int boss50MT = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemBox)
-		bool isBoxOpen = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-		FString myHPbar_Text;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
-		bool isForest;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
-		bool isStone;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
-		bool isWater;
+	int tempboss80 = 0;
+	int tempboss50 = 0;
+	int tempboss30 = 0;
 };

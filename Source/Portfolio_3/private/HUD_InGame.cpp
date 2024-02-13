@@ -13,20 +13,11 @@
 #include <Blueprint/UserWidget.h>
 
 AHUD_InGame::AHUD_InGame() {
-	static ConstructorHelpers::FClassFinder<UUserWidget> ui(TEXT("WidgetBlueprint'/Game/_My/UI/WBP_GamePlayerUI.WBP_GamePlayerUI_C'"));
-	if (ui.Succeeded()) {
-		uiBPClass = ui.Class;
-	}
+
 }
 
 void AHUD_InGame::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (uiBPClass) {
-		uiWidget = CreateWidget<UUserWidget>(GetWorld(), uiBPClass);
-		if (uiWidget) {
-			uiWidget->AddToViewport();
-		}
-	}
 }

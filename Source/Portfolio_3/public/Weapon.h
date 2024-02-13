@@ -28,16 +28,6 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = Weapon)
 		USkeletalMeshComponent* WeaponMesh;
 
-	UPROPERTY(VisibleDefaultsOnly, Category = Weapon)
-		class UBoxComponent* WeaponCollision;
-
-	int tempMontage;
-	int boss50MT;
-
-	// Boss Gimmic temp number
-	int tempboss80;
-	int tempboss50;
-	int tempboss30;
 
 protected:
 	class ABaseCharacter* my;
@@ -49,12 +39,15 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon State")
 		float weaponDamage;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon State")
 		float damagePlus = 0.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Light)
+		class UPointLightComponent* spotLight_OneHand;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Light)
+		class UPointLightComponent* spotLight_TwoHand;
 };

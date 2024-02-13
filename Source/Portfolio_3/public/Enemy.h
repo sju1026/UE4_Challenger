@@ -21,25 +21,21 @@ class PORTFOLIO_3_API AEnemy : public ABaseCharacter, public ICombatInterface
 public:
 	AEnemy();
 
-	virtual void NotifyActorBeginOverlap(AActor* otherActor) override;
-
-	virtual void BeginPlay() override;
-
 	virtual void Tick(float DeltaTime)override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = State)
-		class UBoxComponent* weaponCollisionBox;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = State)
 		FName enemyName;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = State)
-		class UBehaviorTree* botBehavior;*/
-
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = State)
 		float attackDamage = 10.0f;
 
-	virtual int melee_attack_Implementation() override;
+	void EnemyAttack();
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = Attack)
+		float AttackRange = 200.0f;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, Category = Attack)
+		float AttackRadius = 50.0f;
 
 	UAnimMontage* get_montage() const;
 
@@ -72,7 +68,5 @@ private:
 		UAnimMontage* bossMontage30;
 
 	float montageSpeed;
-
-	//class UUserWidget* ui;
 
 };

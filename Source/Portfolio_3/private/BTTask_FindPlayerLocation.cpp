@@ -18,6 +18,7 @@
 #include <Kismet/GameplayStatics.h>
 #include <GameFramework/Character.h>
 #include <blackboard_keys.h>
+#include <PlayerCharacter.h>
 
 UBTTask_FindPlayerLocation::UBTTask_FindPlayerLocation(FObjectInitializer const& object_initializer) {
 	NodeName = TEXT("Find Player Location");
@@ -25,8 +26,8 @@ UBTTask_FindPlayerLocation::UBTTask_FindPlayerLocation(FObjectInitializer const&
 
 EBTNodeResult::Type UBTTask_FindPlayerLocation::ExecuteTask(UBehaviorTreeComponent& owner_comp, uint8* node_memory)
 {
-	ACharacter* const palyer = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	auto const cont = Cast<AEnemyAIController>(owner_comp.GetAIOwner());
+	APlayerCharacter* palyer = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	AEnemyAIController* cont = Cast<AEnemyAIController>(owner_comp.GetAIOwner());
 
 	FVector player_location = palyer->GetActorLocation();
 

@@ -5,7 +5,7 @@
 *  - 적 캐릭터의 공격 범위 내에 플레이어가 있는지 확인하는 Behavior Tree 서비스입니다.
 *  - 서비스는 플레이어와 적 캐릭터 사이의 거리를 계산하고, 해당 정보를 블랙보드에 업데이트합니다.
 *
-* UpdateRate : 2023 - 11 - 29
+* UpdateRate : 2024 - 02 - 13
 */
 
 #include "BTService_IsPlayerInAttackRange.h"
@@ -31,5 +31,5 @@ void UBTService_IsPlayerInAttackRange::OnBecomeRelevant(UBehaviorTreeComponent& 
 
 	ACharacter* const player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 
-	cont->get_blackboard()->SetValueAsBool(bb_keys::player_is_in_AttackRange, npcBot->GetDistanceTo(player) <= Attack_range);
+	cont->get_blackboard()->SetValueAsBool(GetSelectedBlackboardKey(), npcBot->GetDistanceTo(player) <= Attack_range);
 }

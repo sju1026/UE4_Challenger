@@ -7,7 +7,7 @@
 *  - Behavior Tree 및 Blackboard 구성 요소를 초기화하고, 인식 시스템을 설정하여 적이 플레이어를 감지하고 추적하는 기능을 수행합니다. 
 *  - 게임이 시작되면 행동 트리를 실행하고, 플레이어를 감지하면 블랙보드에 관련 정보를 업데이트하여 상태를 조절합니다. 
 *
-* UpdateRate : 2023 - 11 - 29
+* UpdateRate : 2024 - 02 - 13
 */
 
 
@@ -35,7 +35,6 @@ AEnemyAIController::AEnemyAIController(FObjectInitializer const& object_initiali
 		btree = obj.Object;
 	}
 
-
 	behavior_tree_comp = object_initializer.CreateDefaultSubobject<UBehaviorTreeComponent>(this, TEXT("BehaviorComp"));
 	blackboard = object_initializer.CreateDefaultSubobject<UBlackboardComponent>(this, TEXT("BlackboardComp"));
 
@@ -62,6 +61,10 @@ void AEnemyAIController::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	AEnemy* owner = Cast<AEnemy>(GetPawn());
+	if (owner != nullptr && owner->isDeath == true) {
+		btree = nullptr;
+	}
 }
 
 FRotator AEnemyAIController::GetControlRotation() const
@@ -91,9 +94,9 @@ void AEnemyAIController::setup_perception_system()
 	sight_config = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("Sight Config"));
 	SetPerceptionComponent(*CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("Perception Component")));
 
-	sight_config->SightRadius = 500.0;
+	sight_config->SightRadius = 1500.0f;
 	sight_config->LoseSightRadius = sight_config->SightRadius + 50.0f;
-	sight_config->PeripheralVisionAngleDegrees = 90.0f;
+	sight_config->PeripheralVisionAngleDegrees = 270.0f;
 	sight_config->SetMaxAge(5.0f);
 	sight_config->AutoSuccessRangeFromLastSeenLocation = 520.0f;
 	sight_config->DetectionByAffiliation.bDetectEnemies = true;

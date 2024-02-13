@@ -6,7 +6,7 @@
 * - 캐릭터의 체력, 무기 인벤토리, 무기 교체 및 피격 시 애니메이션, 사망 처리 등을 다룹니다. 
 * - 각 함수는 캐릭터의 특정 동작에 대응하여 실행됩니다.
 * 
-* UpdateRate : 2023 - 11 - 30
+* UpdateRate : 2024 - 02 - 13
 */
 
 
@@ -15,6 +15,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine.h"
 #include "Weapon.h"
+#include <TimerManager.h>
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -138,39 +139,18 @@ void ABaseCharacter::OnChangeWeapon()
 
 float ABaseCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (health <= 0.0f)
-	{
-		return 0.0f;
-	}
-
-	const float myGetDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	float myGetDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+	myGetDamage = FMath::Min(health, myGetDamage);
 
 	if (myGetDamage > 0.f)
 	{
 		health -= myGetDamage;
 	}
 
-
 	if (health <= 0)
 	{
-		if (CharacterName == "Player")
-		{
-			APlayerController* con = Cast<APlayerController>(APawn::GetController());
-			PlayAnimMontage(Death_AnimMontage, 1.0f);
-			Die(myGetDamage, DamageEvent, EventInstigator, DamageCauser);
-			con->SetPause(true);
-		}
-		else
-		{
-			PlayAnimMontage(Death_AnimMontage, 1.0f);
-			Die(myGetDamage, DamageEvent, EventInstigator, DamageCauser);
-		}
-
-		/*PlayAnimMontage(Death_AnimMontage, 1.0f);
-		// Die(myGetDamage, DamageEvent, EventInstigator, DamageCauser);
-
-		AController_InGame* con = Cast<AController_InGame>(GetOwner());
-		con->ShowDieUI();*/
+		PlayAnimMontage(Death_AnimMontage, 1.0f);
+		Die();
 	}
 	else
 	{
@@ -178,36 +158,27 @@ float ABaseCharacter::TakeDamage(float Damage, FDamageEvent const& DamageEvent, 
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("HP is : %f"), health));
 	}
 
-
 	return myGetDamage;
 }
 
 void ABaseCharacter::OnHit(float DamageTaken, FDamageEvent const& DamageEvent, APawn* PawnInstigator, AActor* DamageCauser)
 {
-	PlayAnimMontage(BeHit_AnimMontage, 1.0f, FName("GetHit"));
 	if (DamageTaken > 0.f)
 	{
 		ApplyDamageMomentum(DamageTaken, DamageEvent, PawnInstigator, DamageCauser);
 	}
 }
 
-void ABaseCharacter::Die(float KillingDamage, FDamageEvent const& DamageEvent, AController* Killer, AActor* DamageCauser)
+void ABaseCharacter::Die()
 {
+	UE_LOG(LogTemp, Warning, TEXT("DeathFunction!"));
 	isDeath = true;
 
 	health = FMath::Min(0.f, health);
 
-	UDamageType const* const DamageType = DamageEvent.DamageTypeClass ? Cast<const UDamageType>(DamageEvent.DamageTypeClass->GetDefaultObject()) : GetDefault<UDamageType>();
-
-	Killer = GetDamageInstigator(Killer, *DamageType);
-
-	GetWorldTimerManager().ClearAllTimersForObject(this);
-
 	if (GetCapsuleComponent())
 	{
-		GetCapsuleComponent()->BodyInstance.SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		GetCapsuleComponent()->BodyInstance.SetResponseToChannel(ECC_Pawn, ECR_Ignore);
-		GetCapsuleComponent()->BodyInstance.SetResponseToChannel(ECC_PhysicsBody, ECR_Ignore);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
 	if (GetCharacterMovement())
@@ -216,22 +187,20 @@ void ABaseCharacter::Die(float KillingDamage, FDamageEvent const& DamageEvent, A
 		GetCharacterMovement()->DisableMovement();
 	}
 
-	if (Controller) {
-		Controller->Destroy();
-	}
+	DetachFromControllerPendingDestroy();
 
-	/*GetMesh()->SetCollisionProfileName("Ragdoll");
-	GetMesh()->SetSimulatePhysics(true);*/
+	float deathTime = PlayAnimMontage(Death_AnimMontage);
 
-	float DeathAnimDuration = PlayAnimMontage(Death_AnimMontage);
-
-	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, this, &ABaseCharacter::OnDieAnimationEnd, DeathAnimDuration, false);
+	GetWorldTimerManager().SetTimer(
+		deathTimer,
+		FTimerDelegate::CreateLambda([this]()->void {UE_LOG(LogTemp, Warning, TEXT("Death!")); this->Destroy(); }),
+		deathTime,
+		false);
 }
+
 void ABaseCharacter::OnDieAnimationEnd()
 {
-	this->SetActorHiddenInGame(true);
-	SetLifeSpan(0.1f);
+	Destroy();
 }
 #pragma endregion
 

@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include <Components/BoxComponent.h>
 #include <Components/StaticMeshComponent.h>
+#include <Engine/Classes/Particles/ParticleSystemComponent.h>
 #include <Weapon.h>
 #include <Item.h>
 #include "ItemBox.generated.h"
@@ -37,7 +38,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Box)
 		TArray<TSubclassOf<AItem>> ItemClasses;
 
+	UPROPERTY(EditDefaultsOnly, Category = "MyFX")
+		UParticleSystem* HitFX;
+
 private:
 	UFUNCTION()
-		void EnterTeleporter(class AActor* overlappedActor, class AActor* otherActor);
+		void EnterActor(class AActor* overlappedActor, class AActor* otherActor);
 };

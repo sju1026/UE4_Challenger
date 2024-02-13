@@ -6,7 +6,7 @@
 * - 무기 메시와 데미지 설정 후, 무기와 적 캐릭터 간의 충돌을 감지하여 데미지를 적용합니다.
 * - 최대 데미지 값과 무기를 소유하는 캐릭터의 상호작용 및 장착/해제 기능도 구현되어 있습니다.
 *
-* UpdateRate : 2024 - 01 - 05
+* UpdateRate : 2024 - 02 - 13
 */
 
 #include "Weapon.h"
@@ -14,7 +14,7 @@
 #include "Engine.h"
 #include <Enemy.h>
 #include <Kismet/GameplayStatics.h>
-
+#include <Components/PointLightComponent.h>
 
 // Sets default values
 AWeapon::AWeapon(const class FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
@@ -26,16 +26,26 @@ AWeapon::AWeapon(const class FObjectInitializer& ObjectInitializer) :Super(Objec
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	RootComponent = WeaponMesh;
 
-	WeaponCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponCollision"));
-	WeaponCollision->SetBoxExtent(FVector(5.0f, 5.0f, 5.0f));
-	WeaponCollision->AttachTo(WeaponMesh, "DamageSocket");
+	spotLight_OneHand = CreateDefaultSubobject<UPointLightComponent>(TEXT("OneHand_SpotLight"));
+	spotLight_TwoHand = CreateDefaultSubobject<UPointLightComponent>(TEXT("TwoHand_SpotLight"));
+
+	spotLight_OneHand->SetupAttachment(RootComponent);
+	spotLight_TwoHand->SetupAttachment(RootComponent);
+
+	spotLight_OneHand->SetRelativeLocation(FVector(0, 0, 0));
+	spotLight_TwoHand->SetRelativeLocation(FVector(0, 0, 0));
+
+	spotLight_OneHand->Intensity = 50000.0f;
+	spotLight_OneHand->AttenuationRadius = 150.0f;
+
+	spotLight_TwoHand->Intensity = 50000.0f;
+	spotLight_TwoHand->AttenuationRadius = 150.0f;
+
+	spotLight_OneHand->SetVisibility(false);
+	spotLight_TwoHand->SetVisibility(false);
 
 	weaponDamage += damagePlus;
-	tempboss80 = 0;
-	tempboss50 = 0;
-	tempboss30 = 0;
-	tempMontage = 0;
-	boss50MT = 0;
+
 }
 
 // ==================== Inventory ====================
@@ -82,36 +92,4 @@ void AWeapon::Tick(float DeltaTime)
 
 }
 
-void AWeapon::NotifyActorBeginOverlap(AActor* OtherActor)
-{
-	if (my) {
-		if (OtherActor->IsA(AEnemy::StaticClass()) && my->isDuringAttack) { // What to modify later
-			AEnemy* bossType = Cast<AEnemy>(OtherActor);
-			UGameplayStatics::ApplyDamage(OtherActor, weaponDamage, NULL, this, UDamageType::StaticClass());
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "ApplyDamage!");
-			if (bossType->enemyName.ToString() == "Boss") {
-				if (tempboss80 == 0) {
-					bossType->BossFunction80();
-					if (tempMontage == 0) {
-						bossType->PlayAnimMontage(bossType->start80, 1.0f);
-						tempMontage++;
-					}
-					tempboss80++;
-				}
-				if (bossType->health / bossType->maxHealth <= 0.5f && tempboss50 == 0) {
-					bossType->BossFunction50();
-					if (boss50MT == 0) {
-						bossType->PlayAnimMontage(bossType->boss50, 1.0f);
-						boss50MT++;
-					}
-					tempboss50++;
-				}
-				if (bossType->health / bossType->maxHealth <= 0.3f && tempboss30 == 0) {
-					bossType->BossFunction30();
-					tempboss30++;
-				}
-			}
-		}
-	}
-}
 

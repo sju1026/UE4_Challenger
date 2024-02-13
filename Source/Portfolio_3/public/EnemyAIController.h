@@ -22,8 +22,13 @@ class PORTFOLIO_3_API AEnemyAIController : public AAIController
 public :
 	AEnemyAIController(FObjectInitializer const& object_initializer = FObjectInitializer::Get());
 
+protected:
+
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* pawn) override;
+
+public:
+
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual FRotator GetControlRotation() const override;
@@ -35,10 +40,10 @@ public :
 
 private:
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
 		class UBehaviorTreeComponent* behavior_tree_comp;
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "AI", meta = (AllowPrivateAccess = "true"))
 		class UBehaviorTree* btree;
 
 	class UBlackboardComponent* blackboard;

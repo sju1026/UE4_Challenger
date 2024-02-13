@@ -27,6 +27,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 		float walkSpeed;
 
+#pragma region Inventory
 	//============================================= Weapon =====================================================
 	USkeletalMeshComponent* GetSpesificPawnMesh()const;
 
@@ -56,6 +57,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Weapon")
 		class AWeapon* currentWeapon;
 	//============================================= Weapon =====================================================
+#pragma endregion
 
 protected:
 	// Called when the game starts or when spawned
@@ -68,8 +70,6 @@ public:
 protected:
 
 	virtual void OnHit(float DamageTaken, struct FDamageEvent const& DamageEvent, class APawn* PawnInstigator, class AActor* DamageCauser);
-
-	virtual void Die(float KillingDamage, struct FDamageEvent const& DamageEvent, AController* Killer, AActor* DamageCauser);
 
 	void OnDieAnimationEnd();
 
@@ -84,10 +84,11 @@ public:
 		bool isDeath = false;
 
 	UPROPERTY(EditDefaultsOnly, Category = MT)
-		UAnimMontage* BeHit_AnimMontage;
-
-	UPROPERTY(EditDefaultsOnly, Category = MT)
 		UAnimMontage* Death_AnimMontage;
 
+	void Die();
+
 	bool isDuringAttack = false;
+
+	FTimerHandle deathTimer;
 };

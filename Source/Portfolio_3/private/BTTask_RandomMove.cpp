@@ -27,8 +27,8 @@ UBTTask_RandomMove::UBTTask_RandomMove(FObjectInitializer const& object_initiali
 
 EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& owner_comp, uint8* node_memory)
 {
-	auto const cont = Cast<AEnemyAIController>(owner_comp.GetAIOwner());
-	auto const npc = cont->GetPawn();
+	AEnemyAIController* const cont = Cast<AEnemyAIController>(owner_comp.GetAIOwner());
+	APawn* const npc = cont->GetPawn();
 
 	FVector const origin = npc->GetActorLocation();
 	FNavLocation loc;
@@ -40,6 +40,6 @@ EBTNodeResult::Type UBTTask_RandomMove::ExecuteTask(UBehaviorTreeComponent& owne
 		cont->get_blackboard()->SetValueAsVector(bb_keys::target_location, loc.Location);
 	}
 
-	FinishLatentTask(owner_comp, EBTNodeResult::Succeeded);
+	// FinishLatentTask(owner_comp, EBTNodeResult::Succeeded);
 	return EBTNodeResult::Succeeded;
 }

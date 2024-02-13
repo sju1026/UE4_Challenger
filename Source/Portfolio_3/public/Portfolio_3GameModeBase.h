@@ -18,9 +18,4 @@ protected:
 	APortfolio_3GameModeBase();
 
 	virtual void BeginPlay() override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "UMG Game")
-		TSubclassOf<UUserWidget>HUDWidgetClass;
-
-	UUserWidget* currentWidget;
 };
