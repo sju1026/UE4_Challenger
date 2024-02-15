@@ -7,24 +7,30 @@
 * - PrimaryActorTick을 통해 주기적인 Tick을 활성화하며, 입력에 따라 캐릭터의 행동을 제어합니다.
 * - 상호작용을 통해 상자를 열거나 무기를 전환하며, 각종 동작을 애니메이션으로 구현하고 있습니다.
 *
-* UpdateRate : 2024 - 02 - 13
+* UpdateRate : 2024 - 02 - 15
 */
 
 #include "PlayerCharacter.h"
+#pragma region EngineHeader
+
 #include <GameFramework/SpringArmComponent.h>
 #include <Camera/CameraComponent.h>
 #include <GameFramework/PlayerController.h>
 #include <GameFramework/CharacterMovementComponent.h>
 #include <UObject/ConstructorHelpers.h>
 #include <Components/PointLightComponent.h>
-#include <Weapon.h>
-#include <ItemBox.h>
+#include <Components/CapsuleComponent.h>
 #include "DrawDebugHelpers.h"
 #include <Kismet/GameplayStatics.h>
-#include <Enemy.h>
 #include <UObject/ConstructorHelpers.h>
 #include <Blueprint/UserWidget.h>
+
+#pragma endregion
+
 #include <Portfolio_3GameModeBase.h>
+#include <Weapon.h>
+#include <ItemBox.h>
+#include <Enemy.h>
 #include <TimerManager.h>
 
 APlayerCharacter::APlayerCharacter() {
@@ -44,7 +50,7 @@ APlayerCharacter::APlayerCharacter() {
 	bUseControllerRotationYaw = false;
 
 	walkSpeed = 600.0f;
-	dodgeDistance = 4000.0f;
+	dodgeDistance = 7000.0f;
 	sprintSpeed = 300.0f;
 
 	isForest = false;
@@ -64,6 +70,19 @@ void APlayerCharacter::PostInitializeComponents()
 void APlayerCharacter::Tick(float deltaTime)
 {
 	Super::Tick(deltaTime);
+
+	if (hitPlayerAsBullet == 5 && isStop == false) {
+		isStop = false;
+
+		GetCharacterMovement()->MaxWalkSpeed = 0;
+
+		FTimerHandle stopTimerHandle;
+		GetWorldTimerManager().SetTimer(
+			stopTimerHandle,
+			FTimerDelegate::CreateLambda([this]()->void {GetCharacterMovement()->MaxWalkSpeed = walkSpeed; }),
+			3.0f,
+			false);
+	}
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* playerInput)
@@ -128,11 +147,20 @@ void APlayerCharacter::Dodging()
 {
 	if (dodgeable) {
 		dodgeable = false;
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("NoCollision"));
+		PlayAnimMontage(dodgeAnim, 2.0f);
+
 		const FVector forwardDir = this->GetActorRotation().Vector();
-		LaunchCharacter(forwardDir * dodgeDistance, true, true);
+		LaunchCharacter(forwardDir * dodgeDistance, true, false);
+
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("QueryAndPhysics"));
+
+		FTimerHandle dodgetTimeHandle;
 		GetWorldTimerManager().SetTimer(
-			playerTime,
-			FTimerDelegate::CreateLambda([this]()->void {dodgeable = true; UE_LOG(LogTemp, Warning, TEXT("DodgeAble!")); }),
+			dodgetTimeHandle,
+			FTimerDelegate::CreateLambda([this]()->void {dodgeable = true; }),
 			dodgeTimer,
 			false);
 	}
@@ -149,10 +177,7 @@ void APlayerCharacter::InputLookUp(float value)
 		this->AddControllerPitchInput(value);
 	}
 }
-FString APlayerCharacter::GetHealthText() const
-{
-	return FString::SanitizeFloat(health) + "/" + FString::SanitizeFloat(maxHealth);
-}
+
 #pragma endregion
 
 #pragma region Attack
@@ -208,40 +233,64 @@ void APlayerCharacter::Attack_OneHand()
 
 void APlayerCharacter::Attack_OneHand_Q()
 {
-	if (!isDuringAttack) {
+	if (!isDuringAttack && skillQalbe) {
 		isDuringAttack = true;
+		skillQalbe = false;
 		if (isNone)
 			isDuringAttack = false;
 		if (isOneHand)
 			PlayAnimMontage(OneHand_Attack_Q, 1.5f);
 		if (isTwoHand)
 			PlayAnimMontage(TwoHand_Attack_Q, 1.5f);
+
+		FTimerHandle skillQTimeHandle;
+		GetWorldTimerManager().SetTimer(
+			skillQTimeHandle,
+			FTimerDelegate::CreateLambda([this]()->void {skillQalbe = true; }),
+			skillTimer,
+			false);
 	}
 }
 
 void APlayerCharacter::Attack_OneHand_E()
 {
-	if (!isDuringAttack) {
+	if (!isDuringAttack && skillEable) {
 		isDuringAttack = true;
+		skillEable = false;
 		if (isNone)
 			isDuringAttack = false;
 		if (isOneHand)
 			PlayAnimMontage(OneHand_Attack_E, 1.5f);
 		if (isTwoHand)
 			PlayAnimMontage(TwoHand_Attack_E, 1.5f);
+
+		FTimerHandle skillETimeHandle;
+		GetWorldTimerManager().SetTimer(
+			skillETimeHandle,
+			FTimerDelegate::CreateLambda([this]()->void {skillEable = true; }),
+			skillTimer,
+			false);
 	}
 }
 
 void APlayerCharacter::Attack_OneHand_C()
 {
-	if (!isDuringAttack) {
+	if (!isDuringAttack && skillCable) {
 		isDuringAttack = true;
+		skillCable = false;
 		if (isNone)
 			isDuringAttack = false;
 		if (isOneHand)
 			PlayAnimMontage(OneHand_Attack_C, 1.5f);
 		if (isTwoHand)
 			PlayAnimMontage(TwoHand_Attack_C, 1.5f);
+
+		FTimerHandle skillCTimeHandle;
+		GetWorldTimerManager().SetTimer(
+			skillCTimeHandle,
+			FTimerDelegate::CreateLambda([this]()->void {skillCable = true; }),
+			skillTimer,
+			false);
 	}
 }
 
@@ -285,9 +334,8 @@ void APlayerCharacter::AttackCheck()
 	if (bResult) {
 		if (HitResult.Actor.IsValid() && HitResult.Actor->IsA(AEnemy::StaticClass())) {
 			AWeapon* currentweapon = currentWeapon;
-			AEnemy* hit_enemy = Cast<AEnemy>(HitResult.Actor);
-			if (hit_enemy->CharacterName.ToString() != "Boss" && hit_enemy->health - currentweapon->weaponDamage <= 0.0f) {
-				hit_enemy->health = 0;
+			hit_enemy = Cast<AEnemy>(HitResult.Actor);
+			if (hit_enemy->enemyName.ToString() != "Boss" && hit_enemy->health - currentweapon->weaponDamage <= 0.0f) {
 				hit_enemy->PlayAnimMontage(hit_enemy->Death_AnimMontage, 1.0f);
 				hit_enemy->Die();
 			}
@@ -296,26 +344,42 @@ void APlayerCharacter::AttackCheck()
 				hit_enemy->health -= currentweapon->weaponDamage;
 			}
 
-			if (hit_enemy->CharacterName.ToString() == "Boss") {
-				if (tempboss80 == 0) {
+			if (hit_enemy->enemyName.ToString() == "Boss") {
+				if (hit_enemy->health / hit_enemy->maxHealth <= 0.8f && bossHealth80 == false) {
+					bossHealth80 = true;
 					hit_enemy->BossFunction80();
 					if (tempMontage == 0) {
 						hit_enemy->PlayAnimMontage(hit_enemy->start80, 1.0f);
 						tempMontage++;
 					}
-					tempboss80++;
 				}
-				if (hit_enemy->health / hit_enemy->maxHealth <= 0.5f && tempboss50 == 0) {
+				if (hit_enemy->health / hit_enemy->maxHealth <= 0.5f && bossHealth50 == false) {
+					bossHealth50 = true;
 					hit_enemy->BossFunction50();
 					if (boss50MT == 0) {
 						hit_enemy->PlayAnimMontage(hit_enemy->boss50, 1.0f);
 						boss50MT++;
 					}
-					tempboss50++;
 				}
-				if (hit_enemy->health / hit_enemy->maxHealth <= 0.3f && tempboss30 == 0) {
+				if (hit_enemy->health / hit_enemy->maxHealth <= 0.3f && bossHealth30 == false) {
+					bossHealth30 = true;
 					hit_enemy->BossFunction30();
-					tempboss30++;
+				}
+
+				if (hit_enemy->health - currentWeapon->weaponDamage <= 0)
+				{
+					if (hit_enemy->nextLevelClass != nullptr) {
+						FVector vpos = this->GetActorLocation();
+						FVector spawnLocation = FVector(vpos.X - 150.0f, vpos.Y, vpos.Z);
+
+						FActorSpawnParameters params;
+						params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+						GetWorld()->SpawnActor<AActor>(hit_enemy->nextLevelClass, spawnLocation, GetActorRotation(), params);
+						UE_LOG(LogTemp, Warning, TEXT("Spawn nextLevel"));
+					}
+					hit_enemy->PlayAnimMontage(hit_enemy->Death_AnimMontage, 1.0f);
+					hit_enemy->Die();
 				}
 			}
 
@@ -325,4 +389,5 @@ void APlayerCharacter::AttackCheck()
 	}
 	
 }
+
 #pragma endregion

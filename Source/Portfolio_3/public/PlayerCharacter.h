@@ -92,8 +92,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = State)
 		bool isWater;
 
-	UFUNCTION(BlueprintPure)
-		FString GetHealthText() const;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = State)
+		int32 hitPlayerAsBullet = 0;
 
 private:
 	void MoveForward(float value);
@@ -107,6 +107,9 @@ private:
 
 	void SprintEnter();
 	void SprintEnd();
+
+	UPROPERTY(EditAnywhere, Category = MT)
+		UAnimMontage* dodgeAnim;
 
 	UPROPERTY(EditAnywhere, Category = State)
 		float dodgeDistance;
@@ -127,10 +130,27 @@ private:
 		float AttackRadius;
 
 	// Boss Gimmic temp number
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		class AEnemy* hit_enemy;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Enemy", meta = (AllowPrivateAccess = "true"))
+		bool bossHealth80 = false;
+
+	UPROPERTY(VisibleAnywhere)
+		bool bossHealth50 = false;
+
+	UPROPERTY(VisibleAnywhere)
+		bool bossHealth30 = false;
+
 	int tempMontage = 0;
 	int boss50MT = 0;
 
-	int tempboss80 = 0;
-	int tempboss50 = 0;
-	int tempboss30 = 0;
+	bool skillQalbe = true;
+	bool skillEable = true;
+	bool skillCable = true;
+	bool isStop = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
+		float skillTimer = 3.0f;
+
 };

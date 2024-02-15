@@ -44,6 +44,18 @@ void ABaseCharacter::Tick(float DeltaTime)
 
 }
 
+float ABaseCharacter::GetHealthPercent() const
+{
+	return health / maxHealth;
+}
+
+FString ABaseCharacter::GetHealthText() const
+{
+	return FString::SanitizeFloat(health) + "/" + FString::SanitizeFloat(maxHealth);
+}
+
+#pragma region Inventory
+
 USkeletalMeshComponent* ABaseCharacter::GetSpesificPawnMesh() const
 {
 	return GetMesh();
@@ -134,6 +146,8 @@ void ABaseCharacter::OnChangeWeapon()
 
 	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, "change!");
 }
+#pragma endregion
+
 
 #pragma region Hit
 

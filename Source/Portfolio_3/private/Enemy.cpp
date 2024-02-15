@@ -6,21 +6,44 @@
 *  - 이 적은 특정 지점에 무기 공격 충돌 상자(Attack Collision)를 가지며, 이 충돌 상자가 다른 캐릭터와 겹치게 되면 일정한 애니메이션을 재생하면서 플레이어에게 피해를 입힙니다.
 *  - 또한, 적은 움직임을 설정하고 특정 애니메이션을 플레이하는 데 사용되는 몽타주(Animation Montage)를 가집니다.
 *
-* UpdateRate : 2024 - 02 - 13
+* UpdateRate : 2024 - 02 - 15
 */
 
 #include "Enemy.h"
 #include <Kismet/GameplayStatics.h>
 #include <GameFramework/CharacterMovementComponent.h>
-#include <UObject/ConstructorHelpers.h>
-#include <PlayerCharacter.h>
+#include <Components/BoxComponent.h>
 #include <DrawDebugHelpers.h>
+#include <TimerManager.h>
+
+#include <PlayerCharacter.h>
+#include <Projectile.h>
 
 AEnemy::AEnemy() 
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	windmillCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("WindmillCollision"));
+	windmillCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	windmillCollision->SetBoxExtent(FVector(300.0f, 300.0f, 10.0f));
+
+	windmillCollision->AttachTo(GetMesh(), "WindmillSocket");
+
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+}
+
+void AEnemy::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (enemyName.ToString() == "Boss") {
+		GetWorldTimerManager().SetTimer(
+			bulletTimerHandle,
+			this,
+			&AEnemy::BulletSpawn,
+			0.5f,
+			true);
+	}
 }
 
 void AEnemy::Tick(float DeltaTime)
@@ -32,6 +55,7 @@ void AEnemy::Tick(float DeltaTime)
 void AEnemy::EnemyAttack()
 {
 	PlayAnimMontage(montage);
+
 	FHitResult HitResult;
 	FCollisionQueryParams Params(NAME_None, false, this);
 	bool bResult = GetWorld()->SweepSingleByChannel(
@@ -94,9 +118,25 @@ void AEnemy::BossFunction80()
 			walkSpeed += 100.0f;
 			attackDamage += 1.0f;
 
-			/*UUI_InGame* bossUI = Cast<UUI_InGame>(ui);
-			bossUI->HUD_BossHPbar_value->SetVisibility(ESlateVisibility::Visible);*/
-			
+			// Boss Pattern 1 -> BP_Enemy Spawn
+			if (enemySpawnsClass != nullptr) {
+				for (int i = 0; i < spawnEnemyNum; i++)
+				{
+					FDateTime Now = FDateTime::Now();
+					int32 Seed = Now.GetSecond() + Now.GetMillisecond();
+					FRandomStream RandomStream(Seed);
+					int32 RandomNumber = RandomStream.RandRange(200, 400);
+
+					FVector vpos = this->GetActorLocation();
+					FVector spawnLocation = FVector(vpos.X - RandomNumber, vpos.Y - RandomNumber, vpos.Z);
+
+					FActorSpawnParameters params;
+					params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+					GetWorld()->SpawnActor<AEnemy>(enemySpawnsClass, spawnLocation, GetActorRotation(), params);
+				}
+			}
+
 			montage = bossMontage80;
 		}
 	}
@@ -111,6 +151,14 @@ void AEnemy::BossFunction50()
 			health += 150.0f;
 			walkSpeed += 100.0f;
 			attackDamage += 1.0f;
+
+			// Boss Parttern 2 -> Windmill
+			GetWorldTimerManager().SetTimer(
+				windmillTimeHandle,
+				this,
+				&AEnemy::WindmillCollisionEnable,
+				1.0f,
+				true);
 
 			montage = bossMontage50;
 		}
@@ -127,7 +175,55 @@ void AEnemy::BossFunction30()
 			walkSpeed += 100.0f;
 			attackDamage += 1.0f;
 			
+			// Boss Parttern 3 -> Bullet
+			GetWorldTimerManager().SetTimer(
+				bulletTimerHandle,
+				this,
+				&AEnemy::BulletSpawn,
+				0.5f,
+				true);
+
 			montage = bossMontage30;
 		}
+	}
+}
+
+void AEnemy::NotifyActorBeginOverlap(AActor* OtherActor)
+{
+	if (OtherActor->IsA(APlayerCharacter::StaticClass())) {
+		UGameplayStatics::ApplyDamage(OtherActor, attackDamage, NULL, this, UDamageType::StaticClass());
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, "ApplyDamage!");
+	}
+}
+
+void AEnemy::WindmillCollisionEnable()
+{
+	--duringWindmill;
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("CollisionEnable"));
+	windmillCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	if (duringWindmill < 1) {
+		GetWorldTimerManager().ClearTimer(windmillTimeHandle);
+	}
+	windmillCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AEnemy::BulletSpawn()
+{
+	if (bulletClass != nullptr) {
+		--duringBulletSpawn;
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Spawn Bullet"));
+
+		FVector location = GetActorLocation();
+		location.Z += 200.0f;
+
+		FActorSpawnParameters params;
+		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		GetWorld()->SpawnActor<AProjectile>(bulletClass, location, GetActorRotation(), params);
+
+		if (duringBulletSpawn < 1) {
+			GetWorldTimerManager().ClearTimer(bulletTimerHandle);
+		}
+
 	}
 }

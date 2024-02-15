@@ -33,7 +33,6 @@ EBTNodeResult::Type UBTTask_Attack::ExecuteTask(UBehaviorTreeComponent& owner_co
 
 	if (FVector::Dist(enemy->GetActorLocation(), player->GetActorLocation()) <= attackRange) {
 		enemy->EnemyAttack();
-		UE_LOG(LogTemp, Warning, TEXT("Player Attack_Enemy"));
 	}
 
 	return EBTNodeResult::Succeeded;

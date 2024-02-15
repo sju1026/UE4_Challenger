@@ -9,10 +9,6 @@
 
 #include "Enemy.generated.h"
 
-
-/**
- * 
- */
 UCLASS()
 class PORTFOLIO_3_API AEnemy : public ABaseCharacter, public ICombatInterface
 {
@@ -20,6 +16,11 @@ class PORTFOLIO_3_API AEnemy : public ABaseCharacter, public ICombatInterface
 	
 public:
 	AEnemy();
+
+protected:
+	virtual void BeginPlay() override;
+
+public:
 
 	virtual void Tick(float DeltaTime)override;
 
@@ -68,5 +69,37 @@ private:
 		UAnimMontage* bossMontage30;
 
 	float montageSpeed;
+
+	// Spawn Enemy
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BossPattern", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<AEnemy> enemySpawnsClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BossPattern", meta = (AllowPrivateAccess = "true"))
+		int32 spawnEnemyNum = 5;
+
+	// Windmill
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BossPattern", meta = (AllowPrivateAccess = "true"))
+		class UBoxComponent* windmillCollision;
+
+	UFUNCTION()
+		virtual void NotifyActorBeginOverlap(AActor* OtherActor) override;
+
+	// SpawnBullet
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BossPattern", meta = (AllowPrivateAccess = "true"))
+		TSubclassOf<class AProjectile> bulletClass;
+
+
+	FTimerHandle windmillTimeHandle;
+	int32 duringWindmill = 3;
+	void WindmillCollisionEnable();
+
+	FTimerHandle bulletTimerHandle;
+	int32 duringBulletSpawn = 6;
+	void BulletSpawn();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Reward")
+		TSubclassOf<AActor> nextLevelClass;
+
 
 };

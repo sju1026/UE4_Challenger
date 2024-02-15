@@ -18,7 +18,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 		FName CharacterName;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	UPROPERTY(BlueprintReadOnly)
 		float health;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
@@ -26,6 +26,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 		float walkSpeed;
+
+	UFUNCTION(BlueprintPure)
+		float GetHealthPercent() const;
+
+	UFUNCTION(BlueprintPure)
+		FString GetHealthText() const;
 
 #pragma region Inventory
 	//============================================= Weapon =====================================================
