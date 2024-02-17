@@ -28,7 +28,6 @@ private:
 	UPROPERTY(VisibleDefaultsOnly, Category = Weapon)
 		USkeletalMeshComponent* WeaponMesh;
 
-
 protected:
 	class ABaseCharacter* my;
 
@@ -50,4 +49,5 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Light)
 		class UPointLightComponent* spotLight_TwoHand;
+
 };

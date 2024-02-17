@@ -10,11 +10,13 @@
 */
 
 #include "Weapon.h"
-#include "Components/BoxComponent.h"
 #include "Engine.h"
-#include <Enemy.h>
 #include <Kismet/GameplayStatics.h>
 #include <Components/PointLightComponent.h>
+#include <Components/BoxComponent.h>
+#include <Enemy.h>
+#include <Projectile.h>
+
 
 // Sets default values
 AWeapon::AWeapon(const class FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
@@ -79,7 +81,6 @@ void AWeapon::OnUnEqip()
 }
 // ==================== Inventory ====================
 
-// Called when the game starts or when spawned
 void AWeapon::BeginPlay()
 {
 	Super::BeginPlay();
@@ -91,5 +92,4 @@ void AWeapon::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
-
 

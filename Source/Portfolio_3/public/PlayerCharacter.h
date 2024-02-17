@@ -153,4 +153,7 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Skill, meta = (AllowPrivateAccess = "true"))
 		float skillTimer = 3.0f;
 
+	UPROPERTY(EditAnywhere, Category = "Effect")
+		class UParticleSystem* impectEffect;
+
 };

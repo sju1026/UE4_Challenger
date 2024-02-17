@@ -10,6 +10,8 @@
 // Sets default values
 AProjectile::AProjectile()
 {
+	PrimaryActorTick.bCanEverTick = true;
+
 	collisionComp = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
 	collisionComp->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnOverlapBegin);
 	RootComponent = collisionComp;
@@ -29,11 +31,14 @@ void AProjectile::BeginPlay()
 
 	APlayerCharacter* player = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
 	FVector playerVector = player->GetActorLocation();
-	playerVector.Z += 200.0f;
-	FVector location = GetActorLocation();
-	FVector spawnPoint = FVector(location.X, location.Y, location.Z + 200.0f);
+	FVector spawnPoint = GetActorLocation();
 
-	projectileMovement->Velocity = (playerVector - spawnPoint) * speed;
+	projectileMovement->Velocity = playerVector - spawnPoint;
+}
+
+void AProjectile::Tick(float deltaTime)
+{
+	Super::Tick(deltaTime);
 }
 
 void AProjectile::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

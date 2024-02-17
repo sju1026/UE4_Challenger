@@ -24,6 +24,7 @@
 #include <Kismet/GameplayStatics.h>
 #include <UObject/ConstructorHelpers.h>
 #include <Blueprint/UserWidget.h>
+#include <TimerManager.h>
 
 #pragma endregion
 
@@ -31,7 +32,7 @@
 #include <Weapon.h>
 #include <ItemBox.h>
 #include <Enemy.h>
-#include <TimerManager.h>
+#include <Projectile.h>
 
 APlayerCharacter::APlayerCharacter() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -332,6 +333,16 @@ void APlayerCharacter::AttackCheck()
 #endif
 
 	if (bResult) {
+		if (HitResult.Actor.IsValid() && HitResult.Actor->IsA(AProjectile::StaticClass())) {
+			AProjectile* bullet = Cast<AProjectile>(HitResult.Actor);
+
+			if (impectEffect != nullptr) {
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), impectEffect, HitResult.Location, bullet->GetActorRotation());
+			}
+
+			bullet->Destroy();
+		}
+
 		if (HitResult.Actor.IsValid() && HitResult.Actor->IsA(AEnemy::StaticClass())) {
 			AWeapon* currentweapon = currentWeapon;
 			hit_enemy = Cast<AEnemy>(HitResult.Actor);

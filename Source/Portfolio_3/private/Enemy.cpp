@@ -214,11 +214,11 @@ void AEnemy::BulletSpawn()
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Spawn Bullet"));
 
 		FVector location = GetActorLocation();
-		location.Z += 200.0f;
+		location.Z += 400.0f;
 
 		FActorSpawnParameters params;
 		params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
+		
 		GetWorld()->SpawnActor<AProjectile>(bulletClass, location, GetActorRotation(), params);
 
 		if (duringBulletSpawn < 1) {

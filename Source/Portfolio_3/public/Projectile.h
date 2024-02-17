@@ -18,6 +18,9 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+public:
+	virtual void Tick(float deltaTime) override;
+
 private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))

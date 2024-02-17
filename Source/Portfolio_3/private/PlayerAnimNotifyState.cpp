@@ -11,7 +11,9 @@
 
 
 #include "PlayerAnimNotifyState.h"
+#include <Components/BoxComponent.h>
 #include "PlayerCharacter.h"
+#include <Weapon.h>
 
 void UPlayerAnimNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration) {
 	// GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Purple, __FUNCTION__);

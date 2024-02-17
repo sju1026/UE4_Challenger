@@ -7,6 +7,7 @@ APortfolio_3GameModeBase::APortfolio_3GameModeBase() {
 
 }
 
+
 void APortfolio_3GameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
